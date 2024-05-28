@@ -43,3 +43,19 @@ body,
   border-radius: 50%;
   cursor: grab;
 }
+.slider-container {
+  position: relative;
+}
+.current-slide {
+  background: green;
+}
+.current-playing-slider .track {
+  background: red;
+}
+.current-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: red;
+}

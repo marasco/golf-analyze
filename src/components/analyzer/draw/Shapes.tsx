@@ -18,7 +18,7 @@ const Shapes = () => {
                 key={shape.key}
                 points={shape.points}
                 stroke={shape.color}
-                strokeWidth={5}
+                strokeWidth={3}
                 tension={0.5}
               />
             );
@@ -31,7 +31,7 @@ const Shapes = () => {
                 width={shape.width}
                 height={shape.height}
                 stroke={shape.color}
-                strokeWidth={5}
+                strokeWidth={3}
                 tension={0.5}
                 radius={50}
               />

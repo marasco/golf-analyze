@@ -96,7 +96,7 @@ const Video = () => {
   }
 
   return (
-    <div>
+    <div className="video-container">
       <video
         ref={videoRef}
         src={blob}

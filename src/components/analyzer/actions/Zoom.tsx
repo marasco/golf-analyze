@@ -15,6 +15,7 @@ const Zoom = () => {
 
   return (
     <div>
+    <div>
         <button
         type="button"
         onClick={zoomIn}
@@ -23,6 +24,8 @@ const Zoom = () => {
         >
             <BsZoomIn />
         </button>
+        </div>
+        <div>
         <button
         type="button"
         onClick={zoomOut}
@@ -31,6 +34,7 @@ const Zoom = () => {
         >
             <BsZoomOut />
         </button>
+    </div>
     </div>
   );
 };
