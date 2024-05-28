@@ -1,75 +1,59 @@
-import { useRef } from "react";
-import * as Slider from "@radix-ui/react-slider";
-import * as Tooltip from "@radix-ui/react-tooltip";
 
 import useAppSelector from "@hooks/useAppSelector";
+import PlayPause from "./PlayPause";
+import ReactSlider from 'react-slider'
+import { useState, useEffect } from 'react';
 import { getPlayer } from "@helpers";
 
-const Progress = () => {
-  const { duration, currentTime, isPlaying } = useAppSelector(
-    (state) => state.video
+
+  
+function MySlider({ start, end, duration, onChange }: { start: number, end: number, duration: number, onChange: (values: number[]) => void }) {
+  return (
+    <ReactSlider
+      className="horizontal-slider"
+      thumbClassName="thumb"
+      trackClassName="track"
+      min={0}
+      max={duration}
+      value={[start, end]}
+      onChange={onChange}
+    />
   );
-  const { isDrawing } = useAppSelector((state) => state.draw);
-  const isPlayingAtStartOfSliderChange = useRef<boolean>(false);
-  const isDragging = useRef<boolean>(false);
+}
+const Progress = () => {
+  const { duration } = useAppSelector((state) => state.video);
+  const [start, setStart] = useState(0);
+  const [end, setEnd] = useState(duration);
+  let player: HTMLVideoElement | null = null;
+  useEffect(() => {
+    setEnd(parseInt(duration.toString()));
+  }, [duration]);
 
-  const handleChange = (values: number[]) => {
-    if (!isDragging.current) {
-      isPlayingAtStartOfSliderChange.current = isPlaying;
+  const changeSlider = ([newStart, newEnd]: number[]) => {
+    player = getPlayer();
+    if (newStart !== start){
+      console.log('changing start to ', newStart)
+      player.currentTime = newStart;
     }
-
-    isDragging.current = true;
-
-    if (isPlaying) {
-      getPlayer().pause();
+    if (newEnd !== end){
+      player.currentTime = newEnd;
+      console.log('changing end to ', newEnd)
     }
-    getPlayer().currentTime = values[0];
-  };
-
-  const handleCommit = () => {
-    if (isPlayingAtStartOfSliderChange.current) {
-      void getPlayer().play();
-    }
-    isDragging.current = false;
+    setStart(newStart);
+    setEnd(newEnd);
   };
 
   return (
     <div className="px-2 w-full">
-      <Slider.Root
-        className="relative select-none touch-none w-full h-[36px] sm:h-[42px] flex items-center rounded"
-        value={[currentTime]}
-        step={0.01}
-        min={0}
-        max={duration}
-        aria-label="Video playback time"
-        onValueChange={handleChange}
-        onValueCommit={handleCommit}
-      >
-        <Slider.Track className="bg-black dark:bg-white relative grow rounded w-full h-full overflow-hidden !bg-opacity-40">
-          <Slider.Range className="absolute bg-brand-blue bg-opacity-70 h-full" />
-        </Slider.Track>
-        <Tooltip.Provider>
-          <Tooltip.Root open>
-            <Tooltip.Trigger asChild>
-              <Slider.Thumb className="block w-3 border border-blue-800 h-[42px] sm:h-[48px] shadow rounded-full focus:shadow-lg bg-brand-blue " />
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                className={`bg-black rounded  p-1 text-xs z-[100] text-white ${
-                  isDrawing ? "opacity-0" : ""
-                }`}
-              >
-                <Tooltip.Arrow />
-                {currentTime.toFixed(2)}
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
-        </Tooltip.Provider>
-      </Slider.Root>
+      <PlayPause start={start} end={end} />
+      <MySlider
+        start={start}
+        end={end}
+        duration={duration}
+        onChange={changeSlider}
+      />
     </div>
   );
 };
-
-//
 
 export default Progress;

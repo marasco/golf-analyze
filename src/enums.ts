@@ -6,9 +6,10 @@ export const enum DrawTypeEnum {
 
 export const enum DrawColorEnum {
   WHITE = "#ffffff",
-  GREEN = "#008400",
-  RED = "#840026",
-  BLUE = "#140084",
-  ORANGE = "#843500",
+  GREEN = "#0cff41",
+  YELLOW = "#ffe30c",
+  RED = "#ef0044",
+  BLUE = "#2600ff",
+  ORANGE = "#ff6600",
   BLACK = "#000000",
 }

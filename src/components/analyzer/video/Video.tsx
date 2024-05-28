@@ -1,6 +1,7 @@
-import { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { BsFillExclamationCircleFill } from "react-icons/bs";
+
 import FocusLock from "react-focus-lock";
 
 import useAppSelector from "@hooks/useAppSelector";
@@ -15,6 +16,21 @@ import {
 } from "@redux/slices/video";
 
 const Video = () => {
+
+
+  const zoom = useAppSelector((state) => state.video.scale);
+  console.log('zoom', zoom)
+  const videoRef = useRef<HTMLVideoElement>(null); // Add type HTMLVideoElement to useRef
+
+  useEffect(() => {
+    console.log('use effect update scale', videoRef)
+    if (videoRef.current !== null) {
+      console.log('update scale')
+      videoRef.current.style.transform = `scale(${zoom})`;
+    }
+  }, [zoom]);
+
+
   const { blob, isFlipped } = useAppSelector((state) => state.video);
   const [playbackError, setPlaybackError] = useState<boolean>(false);
   const dispatch = useAppDispatch();
@@ -80,26 +96,29 @@ const Video = () => {
   }
 
   return (
-    <video
-      src={blob}
-      loop
-      muted
-      autoPlay
-      playsInline
-      data-flipped="false"
-      className={`block max-h-full max-w-full h-full mx-auto pointer-events-none ${
-        isFlipped ? "-scale-x-100" : "scale-x-100"
-      }`}
-      onPlay={onPlay}
-      onPlaying={onPlay}
-      onPause={onPause}
-      onLoadedData={onDurationChange}
-      onDurationChange={onDurationChange}
-      onTimeUpdate={onTimeUpdate}
-      onRateChange={onRateChange}
-      onVolumeChange={onVolumeChange}
-      onError={onError}
-    />
+    <div>
+      <video
+        ref={videoRef}
+        src={blob}
+        loop
+        muted
+        autoPlay
+        playsInline
+        data-flipped="false"
+        className={`block max-h-full max-w-full h-full mx-auto pointer-events-none ${
+          isFlipped ? "-scale-x-100" : "scale-x-100"
+        }`}
+        onPlay={onPlay}
+        onPlaying={onPlay}
+        onPause={onPause}
+        onLoadedData={onDurationChange}
+        onDurationChange={onDurationChange}
+        onTimeUpdate={onTimeUpdate}
+        onRateChange={onRateChange}
+        onVolumeChange={onVolumeChange} 
+        onError={onError}
+      />
+    </div>
   );
 };
 

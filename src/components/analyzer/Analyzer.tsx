@@ -3,7 +3,6 @@ import * as Separator from "@radix-ui/react-separator";
 import useAppSelector from "@hooks/useAppSelector";
 import Canvas from "./draw/Canvas";
 import Video from "./video/Video";
-import PlayPause from "./actions/PlayPause";
 import Progress from "./actions/Progress";
 import Skip from "./actions/Skip";
 import Speed from "./actions/Speed";
@@ -14,6 +13,7 @@ import FullScreen from "./actions/FullScreen";
 import DrawType from "./actions/DrawType";
 import DrawColor from "./actions/DrawColor";
 import Erase from "./actions/Erase";
+import Zoom from "./actions/Zoom";
 import Undo from "./actions/Undo";
 
 const Analyzer = () => {
@@ -42,8 +42,10 @@ const Analyzer = () => {
         >
           <DrawType />
           <DrawColor />
+          <Zoom />
           <Undo />
           <Erase />
+          
         </div>
         <Video />
         <div
@@ -51,10 +53,10 @@ const Analyzer = () => {
             isDrawing ? "opacity-0 pointer-events-none" : ""
           }`}
         >
-          <PlayPause />
+          
           <Progress />
           <Skip />
-          <Speed />
+          <Speed /> 
         </div>
       </div>
       <Canvas />

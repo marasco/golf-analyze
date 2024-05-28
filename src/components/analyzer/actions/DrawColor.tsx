@@ -9,6 +9,7 @@ import { setDrawColor } from "@redux/slices/draw";
 
 const drawColors = [
   DrawColorEnum.WHITE,
+  DrawColorEnum.YELLOW,
   DrawColorEnum.GREEN,
   DrawColorEnum.RED,
   DrawColorEnum.BLUE,

@@ -8,7 +8,6 @@ import App from "@components/App";
 import ServiceWorker from "@components/ServiceWorker";
 import OfflineManager from "@components/OfflineManager";
 import ErrorBoundary from "@components/ErrorBoundary";
-
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

@@ -1,5 +1,4 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
 interface VideoState {
   blob: string | undefined;
   isPlaying: boolean;
@@ -8,6 +7,7 @@ interface VideoState {
   currentTime: number;
   duration: number;
   speed: number;
+  scale: number;
 }
 
 const initialState: VideoState = {
@@ -18,6 +18,7 @@ const initialState: VideoState = {
   currentTime: 0,
   duration: 0,
   speed: 1,
+  scale: 1,
 };
 
 export const videoSlice = createSlice({
@@ -46,6 +47,14 @@ export const videoSlice = createSlice({
     setSpeed: (state, action: PayloadAction<number>) => {
       state.speed = action.payload;
     },
+    dispatchZoomIn: (state, action: PayloadAction<number>) => {
+      console.log('zooming in')
+      state.scale = state.scale + 0.1;
+    },
+    dispatchZoomOut: (state, action: PayloadAction<number>) => {
+      console.log('zooming out')
+      state.scale = state.scale - 0.1;
+    }
   },
 });
 
@@ -58,6 +67,8 @@ export const {
   setCurrentTime,
   setDuration,
   setSpeed,
+  dispatchZoomIn,
+  dispatchZoomOut
 } = videoSlice.actions;
 
 export default videoSlice.reducer;
