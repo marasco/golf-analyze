@@ -14,7 +14,7 @@ const Progress = () => {
     const player = getPlayer();
     const updateCurrentTime = () => {
       if (player.currentTime >= end) {
-        // player.pause();
+         player.pause();
       } else {
         setCurrent(player.currentTime);
       }

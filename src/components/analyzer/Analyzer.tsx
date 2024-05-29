@@ -4,7 +4,6 @@ import useAppSelector from "@hooks/useAppSelector";
 import Canvas from "./draw/Canvas";
 import Video from "./video/Video";
 import Progress from "./actions/Progress";
-import Skip from "./actions/Skip";
 import Speed from "./actions/Speed";
 import Close from "./actions/Close";
 import Muted from "./actions/Muted";
@@ -55,7 +54,6 @@ const Analyzer = () => {
         >
           
           <Progress />
-          <Skip />
           <Speed /> 
         </div>
       </div>

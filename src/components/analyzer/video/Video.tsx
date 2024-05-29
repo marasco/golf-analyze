@@ -16,18 +16,35 @@ import {
 } from "@redux/slices/video";
 
 const Video = () => {
-
-
-  const zoom = useAppSelector((state) => state.video.scale);
-  const videoRef = useRef<HTMLVideoElement>(null); // Add type HTMLVideoElement to useRef
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    console.log('use effect update scale', videoRef)
-    if (videoRef.current !== null) {
-      console.log('update scale')
-      videoRef.current.style.transform = `scale(${zoom})`;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (video!==null && canvas!==null) {
+      const context = canvas.getContext('2d');
+      video.addEventListener('loadedmetadata', function () {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      });
+      video.addEventListener('play', function () {
+        const draw = function () {
+          if (video.paused || video.ended) return;
+          if (context!==null){
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            requestAnimationFrame(draw);
+          }
+        };
+        draw();
+      }, false);
+      video.play().catch((error) => {
+        // Maneja cualquier error que pueda ocurrir durante la reproducción
+        console.error("Error al reproducir el video: ", error);
+      });
     }
-  }, [zoom]);
+  }, []);
 
 
   const { blob, isFlipped } = useAppSelector((state) => state.video);
@@ -93,11 +110,12 @@ const Video = () => {
       document.body
     );
   }
-
   return (
     <div className="video-container">
+      <canvas ref={canvasRef} className="block max-h-full max-w-full h-full mx-auto pointer-events-none" />
       <video
         ref={videoRef}
+        style={{ display: 'none' }} // hide the video element
         src={blob}
         loop
         muted

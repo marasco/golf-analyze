@@ -1,16 +1,14 @@
-import { BsZoomIn, BsZoomOut } from "react-icons/bs";
+import React, { useState } from 'react';
 import useAppDispatch from "@hooks/useAppDispatch";
+import { getPlayer } from "@helpers";
+import { BsZoomIn, BsZoomOut } from "react-icons/bs";
 import { dispatchZoomIn, dispatchZoomOut } from "@redux/slices/video";
-interface TypeCustomMD {
-  video: {
-    cursor: string;
-  },
-  audio: boolean;
-}
 const Zoom = () => {
   const dispatch = useAppDispatch();
-  let recorder: MediaRecorder;
-  const chunks: BlobPart[] = [];
+  const [isRecording, setIsRecording] = useState(false); // Nuevo estado para rastrear si se está grabando
+
+  const [recorder, setRecorder] = useState<MediaRecorder | null>(null); // Use useState here
+  let chunks: BlobPart[] = [];
 
   const zoomIn = () => {
     dispatch(dispatchZoomIn(1));
@@ -18,41 +16,44 @@ const Zoom = () => {
 
   const zoomOut = () => {
     dispatch(dispatchZoomOut(0));
-  };
-const startR = () => {
-    startRecording().catch(console.error);
-}
-  const startRecording = async () => {
-    try {
-      const opts: TypeCustomMD = {
-        video: { cursor: "always" },
-        audio: false
-      };
-      const stream = await navigator.mediaDevices.getDisplayMedia(opts);
-      console.log('start recording')
-      recorder = new MediaRecorder(stream);
-      recorder.ondataavailable = (e) => {
-        console.log('recording...')
-        chunks.push(e.data);
-      }
-      recorder.start(1000);
-    } catch (err) {
-      console.error("Error: ", err);
-    }
-  };
-
-  const stopRecording = () => {
-    console.log({recorder})
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'video/webm' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'canvas.webm';
-      a.click();
     };
-    recorder.stop();
-  };
+    const startR = () => {
+      try {
+        
+        const canvas = document.querySelector('canvas');
+        if (canvas!==null) {
+          const player = getPlayer();
+          player.play().then(() => {}).catch(() => {});
+          setIsRecording(true); 
+          const stream = canvas.captureStream(30); // 30 FPS
+          console.log({stream})
+          const newRecorder = new MediaRecorder(stream);
+          newRecorder.ondataavailable = (e) => {
+            chunks.push(e.data);
+          }
+          newRecorder.onstop = (e) => {
+            console.log('on_stop')
+            const blob = new Blob(chunks, { 'type' : 'video/mp4' });
+            chunks = [];
+            const videoURL = URL.createObjectURL(blob);
+            console.log(videoURL);
+            window.open(videoURL)
+          }
+          newRecorder.start(100);
+          setRecorder(newRecorder); // Use setRecorder here
+        }
+      } catch (err) {
+        console.error("Error: ", err);
+      }
+    };
+  
+    const stopRecording = () => {
+      console.log({recorder}) 
+      setIsRecording(false);
+      if (recorder!==null){
+        recorder.stop();
+      }
+    };
 
   return (
     <div>
@@ -81,7 +82,7 @@ const startR = () => {
           type="button"
           onClick={startR}
           aria-label="Start Recording"
-          className="btn-action"
+          className={`btn-action ${isRecording ? 'recording' : ''}`} 
         >
           A
         </button>

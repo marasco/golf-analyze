@@ -52,6 +52,9 @@ body,
 .current-playing-slider .track {
   background: red;
 }
+.recording {
+  background: gold
+}
 .current-marker {
   position: absolute;
   top: 0;
