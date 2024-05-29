@@ -19,7 +19,6 @@ const Video = () => {
 
 
   const zoom = useAppSelector((state) => state.video.scale);
-  console.log('zoom', zoom)
   const videoRef = useRef<HTMLVideoElement>(null); // Add type HTMLVideoElement to useRef
 
   useEffect(() => {
