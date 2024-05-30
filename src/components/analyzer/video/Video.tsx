@@ -33,6 +33,7 @@ const Video = () => {
         const draw = function () {
           if (video.paused || video.ended) return;
           if (context!==null){
+            //console.log('drawing')
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             requestAnimationFrame(draw);
           }

@@ -8,42 +8,58 @@ const Zoom = () => {
   const dispatch = useAppDispatch();
   const [isRecording, setIsRecording] = useState(false); // Nuevo estado para rastrear si se está grabando
 
-  const [recorder, setRecorder] = useState<MediaRecorder | null>(null); // Use useState here
   let chunks: BlobPart[] = [];
-
+  
   const zoomIn = () => {
     dispatch(dispatchZoomIn(1));
   };
-
+  
   const zoomOut = () => {
     dispatch(dispatchZoomOut(0));
-    };
-    const startR = () => {
-      try {
-        const canvas = document.querySelector('canvas');
-    
-        if (canvas!==null) {
-          const player = getPlayer();
-          player.play().then(() => {}).catch(() => {});
-          setIsRecording(true); 
-
-          const stream = canvas.captureStream(30); // 30 FPS
-          console.log({stream})
-          const newRecorder = new MediaRecorder(stream);
-          setRecorder(newRecorder)
-        }
-      } catch (err) {
-        console.error("Error: ", err);
-      }
-    };
+  };
   
-    const stopRecording = () => {
-      console.log({recorder}) 
-      setIsRecording(false);
-      if (recorder!==null){
-        recorder.stop();
+  const [recorder, setRecorder] = useState<MediaRecorder | null>(null); // Use useState here
+  const startR = () => {
+    try {
+      const canvas = document.querySelector('canvas');
+  
+      if (canvas!==null) {
+        const player = getPlayer();
+        player.play().then(() => {}).catch(() => {});
+        setIsRecording(true); 
+  
+        const stream = canvas.captureStream(30); // 30 FPS
+        const newRecorder = new MediaRecorder(stream);
+        newRecorder.ondataavailable = e => {
+          console.log('data');
+          chunks.push(e.data);
+        }
+        newRecorder.onstop = () => {
+          console.log('on stop event') 
+  
+          const blob = new Blob(chunks, { 'type' : 'video/mp4;' });
+          chunks = [];
+          const videoURL = URL.createObjectURL(blob);
+          console.log(videoURL); // Aquí está la URL del video
+          window.open(videoURL)
+        };
+        setRecorder(newRecorder);
+        newRecorder.start();
       }
-    };
+
+    } catch (err) {
+      console.error("Error: ", err);
+    }
+  };
+  
+  const stopRecording = () => {
+    console.log('stop', {recorder}) 
+    setIsRecording(false);
+    if (recorder!==null){
+      console.log('stop event executing', {recorder}) 
+      recorder.stop();
+    }
+  };
 
   return (
     <div>
@@ -77,8 +93,8 @@ const Zoom = () => {
           A
         </button>
         <button
-          type="button"
           onClick={stopRecording}
+          type="button"
           aria-label="Stop Recording"
           className="btn-action"
         >
