@@ -15,5 +15,5 @@ export default defineConfig({
       "@helpers": path.resolve(__dirname, "./src/helpers.ts"),
     },
   },
-  plugins: [VitePWA(), react(), eslint()],
+  plugins: [VitePWA(), react()],
 });

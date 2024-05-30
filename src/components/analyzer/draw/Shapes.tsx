@@ -1,10 +1,11 @@
 import { Layer, Circle, Line } from "react-konva";
 
 import useAppSelector from "@hooks/useAppSelector";
+import React, { forwardRef } from 'react';
 
 import { DrawTypeEnum } from "@enums";
 
-const Shapes = () => {
+const Shapes = forwardRef((props, ref) => {
   const { shapes } = useAppSelector((state) => state.draw);
 
   return (
@@ -42,6 +43,6 @@ const Shapes = () => {
       })}
     </Layer>
   );
-};
+});
 
 export default Shapes;

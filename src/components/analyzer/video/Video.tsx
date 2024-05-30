@@ -18,12 +18,12 @@ import {
 const Video = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  const zoom = useAppSelector((state) => state.video.scale);
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-
     if (video!==null && canvas!==null) {
+      canvas.style.transform = `scale(${zoom})`;
       const context = canvas.getContext('2d');
       video.addEventListener('loadedmetadata', function () {
         canvas.width = video.videoWidth;
@@ -44,7 +44,7 @@ const Video = () => {
         console.error("Error al reproducir el video: ", error);
       });
     }
-  }, []);
+  }, [zoom]);
 
 
   const { blob, isFlipped } = useAppSelector((state) => state.video);

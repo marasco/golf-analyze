@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux'
 import useAppDispatch from "@hooks/useAppDispatch";
 import { getPlayer } from "@helpers";
 import { BsZoomIn, BsZoomOut } from "react-icons/bs";
@@ -19,28 +20,17 @@ const Zoom = () => {
     };
     const startR = () => {
       try {
-        
         const canvas = document.querySelector('canvas');
+    
         if (canvas!==null) {
           const player = getPlayer();
           player.play().then(() => {}).catch(() => {});
           setIsRecording(true); 
+
           const stream = canvas.captureStream(30); // 30 FPS
           console.log({stream})
           const newRecorder = new MediaRecorder(stream);
-          newRecorder.ondataavailable = (e) => {
-            chunks.push(e.data);
-          }
-          newRecorder.onstop = (e) => {
-            console.log('on_stop')
-            const blob = new Blob(chunks, { 'type' : 'video/mp4' });
-            chunks = [];
-            const videoURL = URL.createObjectURL(blob);
-            console.log(videoURL);
-            window.open(videoURL)
-          }
-          newRecorder.start(100);
-          setRecorder(newRecorder); // Use setRecorder here
+          setRecorder(newRecorder)
         }
       } catch (err) {
         console.error("Error: ", err);
