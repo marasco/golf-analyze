@@ -126,13 +126,13 @@ const Canvas = () => {
   };
 
   return (
-    <div>
+    <div className="konv-container">
       <Stage
       ref={stageRef}
       {...canvasEvents}
       width={width}
       height={height}
-      className="absolute inset0"
+      className="stage-object inset0"
       scaleX={scale}
       scaleY={scale}
     >
