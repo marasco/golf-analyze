@@ -24,6 +24,8 @@ const Video = () => {
     const canvas = canvasRef.current;
     if (video!==null && canvas!==null) {
       canvas.style.transform = `scale(${zoom})`;
+      console.log('setting canvas transform', zoom)
+      console.log(canvas.width, canvas.height)
       const context = canvas.getContext('2d');
       video.addEventListener('loadedmetadata', function () {
         canvas.width = video.videoWidth;
@@ -40,10 +42,7 @@ const Video = () => {
         };
         draw();
       }, false);
-      video.play().catch((error) => {
-        // Maneja cualquier error que pueda ocurrir durante la reproducción
-        console.error("Error al reproducir el video: ", error);
-      });
+      
     }
   }, [zoom]);
 
@@ -113,17 +112,16 @@ const Video = () => {
   }
   return (
     <div className="video-container">
-      <canvas ref={canvasRef} className="canvas-for-video block max-h-full max-w-full h-full mx-auto pointer-events-none" />
-      <video
-        ref={videoRef}
-        style={{ display: 'none' }} // hide the video element
+      <canvas id="video-canvas" ref={canvasRef} className="canvas-for-video block max-w-full max-h-full h-full mx-auto pointer-events-none" />
+      <div id='vid-container' style={{ display: 'none' }}>
+        <video
+        ref={videoRef} 
         src={blob}
         loop
         muted
-        autoPlay
         playsInline
         data-flipped="false"
-        className={`block max-h-full max-w-full h-full mx-auto pointer-events-none ${
+        className={`block max-w-full max-h-full h-full mx-auto pointer-events-none ${
           isFlipped ? "-scale-x-100" : "scale-x-100"
         }`}
         onPlay={onPlay}
@@ -136,6 +134,7 @@ const Video = () => {
         onVolumeChange={onVolumeChange} 
         onError={onError}
       />
+      </div>
     </div>
   );
 };

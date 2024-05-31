@@ -11,10 +11,9 @@ const Canvas = () => {
   const exportedRef = useRef(null);
   const stageRef = useRef(null);
   const canvasEvents = useCanvasEvents();
-  const canvas = document.querySelector('canvas');
-  let width = canvas && canvas.width ? canvas.width:0;
-  let height = canvas && canvas.height ? canvas.height: 0;
-  let scale = 1; //width / initialCanvasWidthRef.current;
+  let scale = 1; //width / initialCanvasWidthRef.current; // check*1
+  const [width, setWidth] = useState(0); 
+  const [height, setHeight] = useState(0);  
   const [isRecording, setIsRecording] = useState(false); // Nuevo estado para rastrear si se está grabando
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null); // Use useState here
 
@@ -54,14 +53,37 @@ const Canvas = () => {
     }
   }
 }
+
+
   useEffect(() => {
     const video = document.getElementsByTagName('video')[0];
-    const canvas = document.querySelector('export'); 
-    //canvas.style.transform = `scale(${zoom})`;
+    const canvas = document.querySelector('#export'); 
+    //canvas.style.transform = `scale(${zoom})`; //check*2
+    const vidContainer = document.querySelector('#video-canvas')
+
     video.addEventListener('loadedmetadata', function () {
       if (canvas){
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        console.log('loaded video', video)
+
+        const width = vidContainer.clientWidth;
+        const height = vidContainer.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+        setWidth(width);
+        setHeight(height);
+        /*
+        const width=canvas.width = video.videoWidth;
+        const height=canvas.height = video.videoHeight;
+        setWidth(width);
+        setHeight(height);
+        const konvaContainer = document.querySelector('.konvajs-content');
+        if (konvaContainer!==null){
+//          konvaContainer.style.width=width+ 'px';
+
+        }
+        */
+        console.log('update width of konva', width)
+        console.log('update height of konva', height)
       }
     });
     video.addEventListener('play', function () {
@@ -69,48 +91,84 @@ const Canvas = () => {
         if (video.paused || video.ended || !canvas) return;
         const context = canvas.getContext('2d');
         if (context!==null){
-          //console.log('drawing')
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
           if (isRecording){
-            // drawShapes
             const stageCanvas = stageRef.current.children[0].canvas._canvas
             if (stageCanvas) {
                 const shapes = stageRef.current.getChildren()[0].children;
                 drawShapes(context, shapes)
             }
-          requestAnimationFrame(draw);
+            if (isRecording)
+               requestAnimationFrame(draw);
           }
         }
       }
       draw();
     }, false); 
   }); // end useEffect
+
+  const previewAction = () => {
+    const videoCanvas = document.querySelector('#video-canvas'); 
+    const video = document.getElementsByTagName('video')[0];
+    const exportCanvas = document.querySelector('#export'); 
+    console.log(videoCanvas)
+    console.log(video)
+    console.log(exportCanvas)
+    const draw = function () {
+      const context = exportCanvas.getContext('2d');
+      if (context!==null){
+        console.log(exportCanvas.width)
+        console.log(exportCanvas.height)
+        context.drawImage(video, 0, 0, exportCanvas.width, exportCanvas.height);
+          const stageCanvas = stageRef.current.children[0].canvas._canvas
+          if (stageCanvas) {
+              const shapes = stageRef.current.getChildren()[0].children;
+              drawShapes(context, shapes);
+              const imageUrl = exportCanvas.toDataURL('image/png');
+              const prevImg = document.querySelector('#prevImg');
+              if (prevImg){
+                prevImg.src = imageUrl;
+              } else {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.id = 'prevImg';
+                img.style.position = 'fixed';
+                img.style.right = '0';
+                img.style.bottom = '0';
+                img.style.width = '200px'; // Ajusta el tamaño según tus necesidades
+                document.body.appendChild(img);
+              }
+
+          }
+//             requestAnimationFrame(draw);
+      }
+    }
+    draw();
+
+  }
   const startR = () => {
     try {
       if (isRecording) return;
-      const canvas = document.querySelector('export'); 
+      const canvas = document.querySelector('#export'); 
       if (canvas!==null) { 
+        console.log('isRecording=> true')
         setIsRecording(true); 
         const player = getPlayer();
-        player.play().then(() => {}).catch(() => {});
         const stream = canvas.captureStream(30); // 30 FPS
         const newRecorder = new MediaRecorder(stream);
+        player.play().then(() => {}).catch(() => {});
         newRecorder.ondataavailable = e => {
-          console.log('data', e.data);
           chunks.push(e.data);
         }
         newRecorder.onstop = () => {
-          console.log('on stop event') 
           const blob = new Blob(chunks, { 'type' : 'video/mp4;' });
-          chunks = [];
           const videoURL = URL.createObjectURL(blob);
-          console.log(videoURL); // Aquí está la URL del video
+          chunks = [];
           window.open(videoURL)
         };
         setRecorder(newRecorder);
         newRecorder.start();
       }
-
     } catch (err) {
       console.error("Error: ", err);
     }
@@ -139,7 +197,7 @@ const Canvas = () => {
       <Shapes />
     </Stage> 
       <canvas id="export" ref={exportedRef} className="canvas-for-export block max-h-full max-w-full h-full mx-auto pointer-events-none hidden" />
-      <div>
+      <div className='top-left-menu'>
       <button
         type="button"
         onClick={startR}
@@ -155,6 +213,14 @@ const Canvas = () => {
         className="btn-action"
       >
         S
+      </button>
+      <button
+        onClick={previewAction}
+        type="button"
+        aria-label="Prev"
+        className="btn-action"
+      >
+        P
       </button>
     </div>
     
