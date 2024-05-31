@@ -55,10 +55,16 @@ body,
 .recording {
   background: gold
 }
+.hidden {
+  display: none;
+}
 .current-marker {
   position: absolute;
   top: 0;
   bottom: 0;
   width: 2px;
   background: red;
+}
+.konvajs-content {
+  margin: 0 auto
 }

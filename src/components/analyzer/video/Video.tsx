@@ -113,7 +113,7 @@ const Video = () => {
   }
   return (
     <div className="video-container">
-      <canvas ref={canvasRef} className="block max-h-full max-w-full h-full mx-auto pointer-events-none" />
+      <canvas ref={canvasRef} className="canvas-for-video block max-h-full max-w-full h-full mx-auto pointer-events-none" />
       <video
         ref={videoRef}
         style={{ display: 'none' }} // hide the video element
