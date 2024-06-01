@@ -16,7 +16,7 @@ const Canvas = () => {
   const [height, setHeight] = useState(0);  
   const [isRecording, setIsRecording] = useState(false); // Nuevo estado para rastrear si se está grabando
   const [recorder, setRecorder] = useState<MediaRecorder | null>(null); // Use useState here
-
+  let codec = 'video/mp4;';
   const drawShapes = function(context:any, shapes:any) {
   for (const shape of shapes) {
     console.log('attrs', shape.attrs)
@@ -25,8 +25,8 @@ const Canvas = () => {
       // Dibuja un círculo
       context.beginPath();
       context.arc(shape.attrs.x, shape.attrs.y, shape.attrs.radius, 0, 2 * Math.PI);
-      context.fillStyle = shape.attrs.fill || shape.colorKey;
-      context.fill();
+      context.strokeStyle = shape.attrs.fill || shape.colorKey; // establece el color del borde
+      context.stroke(); // dibuja el borde del círculo
       console.log('drawing circle')
     } else if (shape.attrs.points && shape.attrs.points.length === 4){
       // Dibuja una línea
@@ -58,30 +58,16 @@ const Canvas = () => {
   useEffect(() => {
     const video = document.getElementsByTagName('video')[0];
     const canvas = document.querySelector('#export'); 
-    //canvas.style.transform = `scale(${zoom})`; //check*2
     const vidContainer = document.querySelector('#video-canvas')
 
     video.addEventListener('loadedmetadata', function () {
       if (canvas){
-        console.log('loaded video', video)
-
         const width = vidContainer.clientWidth;
         const height = vidContainer.clientHeight;
         canvas.width = width;
         canvas.height = height;
         setWidth(width);
-        setHeight(height);
-        /*
-        const width=canvas.width = video.videoWidth;
-        const height=canvas.height = video.videoHeight;
-        setWidth(width);
-        setHeight(height);
-        const konvaContainer = document.querySelector('.konvajs-content');
-        if (konvaContainer!==null){
-//          konvaContainer.style.width=width+ 'px';
-
-        }
-        */
+        setHeight(height); 
         console.log('update width of konva', width)
         console.log('update height of konva', height)
       }
@@ -155,14 +141,28 @@ const Canvas = () => {
         setIsRecording(true); 
         const player = getPlayer();
         const stream = canvas.captureStream(30); // 30 FPS
-        const newRecorder = new MediaRecorder(stream);
+        let newRecorder = null;
+        if (MediaRecorder.isTypeSupported('video/webm; codecs="vp8, vorbis"')) {
+          console.log('using vp8, vorbis')
+          codec = 'video/webm;'
+           newRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs="vp8, vorbis"' });
+        } else if (MediaRecorder.isTypeSupported('video/webm; codecs="vp9"')) {
+          console.log('using vp9')
+           newRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs="vp9"' });
+        } else if (MediaRecorder.isTypeSupported('video/webm; codecs="vp9, opus"')) {
+          console.log('using vp9, opus')
+           newRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs="vp9, opus"' });
+        } else if (MediaRecorder.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) {
+          console.log('using avc1.42E01E, mp4a.40.2')
+          newRecorder = new MediaRecorder(stream, { mimeType: 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"' });
+        }
         player.play().then(() => {}).catch(() => {});
         newRecorder.ondataavailable = e => {
           chunks.push(e.data);
         }
         newRecorder.onstop = () => {
-          const blob = new Blob(chunks, { 'type' : 'video/mp4;' });
-          const videoURL = URL.createObjectURL(blob);
+          const blob = new Blob(chunks, { 'type' : codec });
+          const videoURL = URL.createObjectURL(blob); 
           chunks = [];
           window.open(videoURL)
         };
@@ -178,6 +178,14 @@ const Canvas = () => {
     console.log('stop', {recorder}) 
     setIsRecording(false);
     if (recorder!==null){
+      try {
+      const player = getPlayer();
+        
+      player.pause();
+      player.currentTime = 0;
+      } catch (e){
+        console.error(e)
+      }
       console.log('stop event executing', {recorder}) 
       recorder.stop();
     }

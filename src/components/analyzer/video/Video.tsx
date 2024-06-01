@@ -17,15 +17,33 @@ import {
 
 const Video = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null); //id: video-canvas
   const zoom = useAppSelector((state) => state.video.scale);
+  const vidContainer = document.querySelector('#video-canvas')
+
+     
   useEffect(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    console.log('video zoom?')
     if (video!==null && canvas!==null) {
       canvas.style.transform = `scale(${zoom})`;
       console.log('setting canvas transform', zoom)
-      console.log(canvas.width, canvas.height)
+      // need to update the width and height of konva canvas. zoom does not work fine for video.
+      /*if (vidContainer){
+      let vwidth = vidContainer.clientWidth;
+      let vheight = vidContainer.clientHeight;
+      const scaleString = vidContainer.style.transform; // Ejemplo: "scale(1.2)"
+      const scale = parseFloat(scaleString.slice(6, -1)); // Extrae el factor de escala y lo convierte en un número
+
+      vwidth = vwidth * scale;
+      vheight = vheight * scale;
+
+      console.log('update width of konva', vwidth)
+      document.querySelector('.konvajs-content canvas').style.width = `${vwidth}px`;
+      document.querySelector('.konvajs-content canvas').style.height = `${vheight}px`;
+      }
+      */
       const context = canvas.getContext('2d');
       video.addEventListener('loadedmetadata', function () {
         canvas.width = video.videoWidth;
