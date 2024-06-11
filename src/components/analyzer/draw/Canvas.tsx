@@ -8,7 +8,6 @@ import Shapes from "./Shapes";
 
 const Canvas = () => {
   const chunksRef = useRef<BlobPart[]>([]); // Use useRef here
-
   const exportedRef = useRef(null);
   const stageRef = useRef(null);
   const canvasEvents = useCanvasEvents();
@@ -51,42 +50,6 @@ const Canvas = () => {
   }
 }
 
-  const onStopVideo = async (retry:boolean = false) => {
-    try {
-    console.log('::onStopVideo'); 
-    console.log(chunksRef.current)
-    const blob = new Blob(chunksRef.current);
-    console.log('blob size: ', blob.size)
-      if (blob.size === 0 && !retry) {
-        console.log('blob empty, retrying');
-        setTimeout(() => {
-          onStopVideo(true);
-      }, 1000);
-      return false;
-    } else if (blob.size === 0){
-      console.log('Video cannot be generated')
-      return false;
-    }
-    // Crear FormData con el blob de video
-    const formData = new FormData();
-    formData.append('video', blob, 'input.webm');
-
-    // Enviar el video al servidor para convertirlo
-    const response = await fetch('http://localhost:4001/convert', {
-      method: 'POST',
-      body: formData
-    });
-
-    // Obtener la URL del video convertido de la respuesta
-    const { videoURL } = await response.json();
-    console.log({videoURL})
-    window.open(videoURL);
-    
-    } catch (e){
-      console.error(e)
-    }
-  }
- 
   useEffect(() => {
     const video = document.getElementsByTagName('video')[0];
     const canvas = document.querySelector('#export'); 
@@ -101,8 +64,6 @@ const Canvas = () => {
         canvas.height = height;
         setWidth(width);
         setHeight(height); 
-        console.log('update width of konva', width)
-        console.log('update height of konva', height)
       }
     });
     video.addEventListener('play', function () {
@@ -117,8 +78,7 @@ const Canvas = () => {
                 const shapes = stageRef.current.getChildren()[0].children;
                 drawShapes(context, shapes)
             }
-            if (isRecording)
-               requestAnimationFrame(draw);
+            requestAnimationFrame(draw);
           }
         }
       }
@@ -163,23 +123,76 @@ const startR = async () => {
     if (isRecording) return;
     const canvas = document.querySelector('#export'); 
     if (canvas!==null) { 
-      console.log('isRecording=> true')
+      console.log('startR=> true')
       
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(async micStream => {
-          const player = getPlayer();
+          const player = getPlayer();         
+
           const videoStream = canvas.captureStream(30); // 30 FPS
           console.log('videoStream', videoStream.getTracks())
           console.log('micStream', micStream.getTracks())
-          let combinedStream = new MediaStream([...videoStream.getTracks(), ...micStream.getTracks()]);
+          let combinedStream = new MediaStream([
+            ...videoStream.getTracks(), 
+            ...micStream.getTracks()
+          ]);
+          
           const newRecorder = new MediaRecorder(combinedStream);
+          newRecorder.onstart = () => {
+            console.log('////////MediaRecorder started');
+          };
+          
+          console.log(':play execute')
+          console.log(videoStream.active)
+          console.log(micStream.active)
+          console.log('newRecorder.start...')
+          console.log({newRecorder})
+          setIsRecording(true);
+          
           newRecorder.ondataavailable = e => {
             console.log('ondata', e.data)
-            chunksRef.current.push(e.data);
+            console.log('datasize', e.data.size)
+            if (e.data.size > 0)
+              chunksRef.current.push(e.data);
+            
           }
-          newRecorder.onstop = () => { return onStopVideo() };
-          newRecorder.start(); // Iniciar la grabación
+          newRecorder.onerror = () => {
+            console.log('MediaRecorder error');
+          };
+          newRecorder.start();
           player.play();
+          newRecorder.onstop = () => { 
+            setIsRecording(false);
+            player.pause();
+            player.currentTime = 0;
+            try {
+              if (!chunksRef.current.length) { console.log('no chunks');  return false;  }
+              console.log('::onStopVideo'); 
+              console.log(chunksRef.current)
+              const blob = new Blob(chunksRef.current);
+              console.log('blob size: ', blob.size)
+              if (blob.size === 0) { return false }
+              const formData = new FormData();
+              formData.append('video', blob, 'input.webm');
+          
+              // Enviar el video al servidor para convertirlo
+              const response = fetch('http://localhost:4001/convert', {
+                method: 'POST',
+                body: formData
+              }).then(async response => {
+                const { videoURL } = await response.json();
+                console.log({videoURL})
+                window.open(videoURL);
+              })
+          
+              // Obtener la URL del video convertido de la respuesta
+              
+              
+              } catch (e){
+                console.error(e)
+              }
+
+          };
           setRecorder(newRecorder);
         })
         .catch(error => {
@@ -193,12 +206,9 @@ const startR = async () => {
   
   const stopRecording = () => {
     setIsRecording(false);
-    if (recorder!==null){
-      const player = getPlayer();
-      player.pause();
-      player.currentTime = 0;
+    if (recorder!==null){ 
       console.log('stop event executing', {recorder}) 
-      recorder.stop();
+      setTimeout(() => recorder.stop(), 2000);
 
     }
   };
