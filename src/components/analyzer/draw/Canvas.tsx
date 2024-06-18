@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage } from "react-konva";
 import { getPlayer } from "@helpers";
-
+import dotenv from 'dotenv';
+dotenv.config();
 import useCanvasEvents from "@hooks/useCanvasEvents";
 
 import Shapes from "./Shapes";
@@ -176,13 +177,14 @@ const startR = async () => {
               formData.append('video', blob, 'input.webm');
           
               // Enviar el video al servidor para convertirlo
-              const response = fetch('http://localhost:4001/convert', {
+              const response = fetch(`${process.env.API_URL}/convert`, {
                 method: 'POST',
                 body: formData
               }).then(async response => {
                 const { videoURL } = await response.json();
-                console.log({videoURL})
-                window.open(videoURL);
+                const finalUrl = `${process.env.API_URL}/${videoURL}`;
+                console.log({finalUrl})
+                window.open(finalUrl);
               })
           
               // Obtener la URL del video convertido de la respuesta
