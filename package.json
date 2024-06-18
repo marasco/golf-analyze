@@ -28,6 +28,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@reduxjs/toolkit": "^1.9.7",
+    "@types/node": "^20.14.5",
     "@vercel/analytics": "^1.1.1",
     "dotenv": "^16.4.5",
     "konva": "^9.2.3",
