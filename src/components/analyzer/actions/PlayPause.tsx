@@ -13,7 +13,7 @@ const PlayPause = ({ start, end }: { start: number, end: number }) => {
 
   const handlePlay = () => {
     const player = getPlayer();
-    player.currentTime = start;
+    //player.currentTime = start;
     void player.play();
   };
 
